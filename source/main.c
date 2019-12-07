@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
-#include <malloc.h>
 #include <switch.h>
 
 #include <threads.h>
@@ -31,6 +29,7 @@ int main(int argc, char *argv[])
     ThreadDataStruct_t ptr;
     ptr.out_file = open_file("out_file", "wb");
     ptr.in_file = open_file("in_file", "rb");
+    ptr.data = malloc(_8MiB);
     ptr.data_size = 0;
     ptr.data_written = 0;
     ptr.file_size = get_filesize("in_file");
@@ -47,6 +46,7 @@ int main(int argc, char *argv[])
 
     fclose(ptr.in_file);
     fclose(ptr.out_file);
+    free(ptr.data);
 
     print_message_loop_lock("exiting\n\n");
     app_exit();

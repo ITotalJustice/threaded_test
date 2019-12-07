@@ -3,22 +3,32 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
-#include <switch.h>
+#include <threads.h>
 
 #include "threaded.h"
 #include "util.h"
 
 
-static bool wait = false;
-static bool write = false;
+// globals
+static mtx_t g_mtx;
+static bool g_write = false;
 
+
+void thread_mutex_init()
+{
+    mtx_init(&g_mtx, mtx_plain);
+}
+
+void thread_mutex_close()
+{
+    mtx_destroy(&g_mtx);
+}
 
 int thread_read_func(void *in)
 {
     ThreadDataStruct_t *t_struct = (ThreadDataStruct_t *)in;
 
     void *buf_temp = malloc(_8MiB);
-    t_struct->data = malloc(_8MiB);
 
     for (size_t buf_size = _8MiB, offset = 0; offset < t_struct->file_size; offset += buf_size)
     {
@@ -27,17 +37,13 @@ int thread_read_func(void *in)
         
         fread(buf_temp, buf_size, 1, t_struct->in_file);
 
-        while (wait == true);
-    
+        mtx_lock(&g_mtx);
         t_struct->data_size = buf_size;
         memcpy(t_struct->data, buf_temp, buf_size);
-
-        wait = true;
-        write = true;
+        g_write = true;
+        mtx_unlock(&g_mtx);
     }
 
-    free(buf_temp);
-    free(t_struct->data);
     return 0;
 }
 
@@ -47,13 +53,13 @@ int thread_write_func(void *in)
 
     while (t_struct->data_written != t_struct->file_size)
     {
-        if (write == true)
+        if (g_write == true)
         {
+            mtx_lock(&g_mtx);
             fwrite(t_struct->data, t_struct->data_size, 1, t_struct->out_file);
             t_struct->data_written += t_struct->data_size;
-
-            write = false;
-            wait = false;
+            g_write = false;
+            mtx_unlock(&g_mtx);
         }
     }
     return 0;
