@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <switch.h>
 
-#include <threads.h>
-
 #include "usb.h"
 #include "threaded.h"
 #include "util.h"
@@ -13,13 +11,13 @@
 void app_init()
 {
     consoleInit(NULL);
-    //usbCommsInitialize(); for when i try usb multi threading.
+    usbCommsInitialize();
 }
 
 void app_exit()
 {
     consoleExit(NULL);
-    //usbCommsExit();
+    usbCommsExit();
 }
 
 int main(int argc, char *argv[])
@@ -32,19 +30,20 @@ int main(int argc, char *argv[])
     ptr.data = malloc(_8MiB);
     ptr.data_size = 0;
     ptr.data_written = 0;
-    ptr.file_size = get_filesize("in_file");
+    ptr.file_size = 0x100000000;
 
     thread_mutex_init();
 
-    thrd_t t_1;
-    thrd_t t_2;
-    thrd_create(&t_1, thread_read_func, &ptr);
-    thrd_create(&t_2, thread_write_func, &ptr);
+    ThreadStruct_t t_1;
+    ThreadStruct_t t_2;
+
+    thread_spawner(&t_1, thread_read_func, &ptr);
+    thread_spawner(&t_2, thread_write_func, &ptr);
 
     print_message_display("waiting for thread 1 to finish\n");
-    thrd_join(t_1, NULL);
-    print_message_display("waiting for thread 2 to finish %d\n", ptr.data_written);
-    thrd_join(t_2, NULL);
+    thread_wait_until_exit(&t_1);
+    print_message_display("waiting for thread 2 to finish %d\n");
+    thread_wait_until_exit(&t_2);
 
     fclose(ptr.in_file);
     fclose(ptr.out_file);

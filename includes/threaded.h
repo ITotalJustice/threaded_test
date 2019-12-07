@@ -1,21 +1,13 @@
 #ifndef _THREADED_H_
 #define _THREADED_H_
 
-#include <stdio.h>
 #include <stdint.h>
+#include <machine/_threads.h>
 
-
-typedef enum
+typedef struct
 {
-    ThreadState_InProgress = 0x0,   // lock.
-    ThreadState_Waiting = 0x1,      // waiting for data.
-} ThreadState;
-
-typedef enum
-{
-    ThreadStart_On,
-    ThreadStart_Off
-} ThreadStart;
+    thrd_t t;
+} ThreadStruct_t;
 
 typedef struct
 {
@@ -23,9 +15,6 @@ typedef struct
     size_t data_size;
     size_t data_written;
     size_t file_size;
-
-    FILE *in_file;
-    FILE *out_file;
 } ThreadDataStruct_t;
 
 
@@ -34,6 +23,12 @@ void thread_mutex_init();
 
 //
 void thread_mutex_close();
+
+//
+void thread_spawner(ThreadStruct_t *t_struct, void *func, void *in);
+
+//
+void thread_wait_until_exit(ThreadStruct_t *t_struct);
 
 //
 int thread_read_func(void *in);

@@ -3,14 +3,21 @@
 
 #include <stdint.h>
 
+
+typedef enum
+{
+    UsbMode_Exit,
+    UsbMode_Read,
+    UsbMode_Write
+} UsbMode;
+
 typedef struct
 {
-    uint64_t mode;
+    uint8_t mode;
     uint8_t padding[0x7];
     uint64_t offset_start;
-    uint8_t padding2[0x7];
     uint64_t data_size;
-    uint8_t padding3[0x7];
+    uint8_t unused[0x18];
 } usb_struct_t;
 
 
@@ -21,7 +28,7 @@ size_t usb_read(void *out, size_t len, uint64_t offset);
 size_t usb_write(const void *in, size_t len);
 
 // call this before every read.
-void usb_poll(int mode, size_t offset, size_t data_size);
+void usb_poll(uint8_t mode, size_t offset, size_t data_size);
 
 // call this to exit usb comms.
 void usb_exit(void);
