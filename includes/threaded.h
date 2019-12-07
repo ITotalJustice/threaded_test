@@ -30,6 +30,12 @@ typedef struct
 
 
 //
+void thread_mutex_init();
+
+//
+void thread_mutex_close();
+
+//
 int thread_read_func(void *in);
 
 //

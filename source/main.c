@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
     ptr.data_written = 0;
     ptr.file_size = get_filesize("in_file");
 
+    thread_mutex_init();
+
     thrd_t t_1;
     thrd_t t_2;
     thrd_create(&t_1, thread_read_func, &ptr);
@@ -47,6 +49,7 @@ int main(int argc, char *argv[])
     fclose(ptr.in_file);
     fclose(ptr.out_file);
     free(ptr.data);
+    thread_mutex_close();
 
     print_message_loop_lock("exiting\n\n");
     app_exit();
