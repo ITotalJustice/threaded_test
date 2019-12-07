@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
     print_message_display("waiting for thread 1 to finish\n");
     thrd_join(t_1, NULL);
-    print_message_display("waiting for thread 2 to finish\n");
+    print_message_display("waiting for thread 2 to finish %d\n", ptr.data_written);
     thrd_join(t_2, NULL);
 
     fclose(ptr.in_file);

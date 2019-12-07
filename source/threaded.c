@@ -11,7 +11,6 @@
 
 // globals
 static mtx_t g_mtx;
-static bool g_write = false;
 
 
 void thread_mutex_init()
@@ -40,7 +39,6 @@ int thread_read_func(void *in)
         mtx_lock(&g_mtx);
         t_struct->data_size = buf_size;
         memcpy(t_struct->data, buf_temp, buf_size);
-        g_write = true;
         mtx_unlock(&g_mtx);
     }
 
@@ -56,8 +54,9 @@ int thread_write_func(void *in)
         mtx_lock(&g_mtx);
         fwrite(t_struct->data, t_struct->data_size, 1, t_struct->out_file);
         t_struct->data_written += t_struct->data_size;
-        g_write = false;
+        t_struct->data_size = 0;
         mtx_unlock(&g_mtx);
     }
+
     return 0;
 }
