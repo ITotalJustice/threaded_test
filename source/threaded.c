@@ -53,14 +53,11 @@ int thread_write_func(void *in)
 
     while (t_struct->data_written != t_struct->file_size)
     {
-        if (g_write == true)
-        {
-            mtx_lock(&g_mtx);
-            fwrite(t_struct->data, t_struct->data_size, 1, t_struct->out_file);
-            t_struct->data_written += t_struct->data_size;
-            g_write = false;
-            mtx_unlock(&g_mtx);
-        }
+        mtx_lock(&g_mtx);
+        fwrite(t_struct->data, t_struct->data_size, 1, t_struct->out_file);
+        t_struct->data_written += t_struct->data_size;
+        g_write = false;
+        mtx_unlock(&g_mtx);
     }
     return 0;
 }
